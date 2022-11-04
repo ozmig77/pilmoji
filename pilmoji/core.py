@@ -263,6 +263,9 @@ class Pilmoji:
         if font is None:
             font = ImageFont.load_default()
 
+        if type(font) == ImageFont.TransposedFont:
+            font.size = font.font.size
+
         args = (
             fill,
             font,
@@ -310,6 +313,13 @@ class Pilmoji:
                     width = int(emoji_scale_factor * font.size)
                     size = width, math.ceil(asset.height / asset.width * width)
                     asset = asset.resize(size, Image.ANTIALIAS)
+                    # Support TransposedFont
+                    if font.orientation in [Image.ROTATE_90,
+                                            Image.ROTATE_180,
+                                            Image.ROTATE_270]:
+                        asset = asset.rotate(90*(font.orientation - 1),
+                                     Image.NEAREST,
+                                     expand = 1)
 
                     ox, oy = emoji_position_offset
                     self.image.paste(asset, (x + ox, y + oy), asset)
